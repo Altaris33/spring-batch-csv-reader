@@ -1,11 +1,8 @@
 package fr.captain.spring_batch_csv_reader.configuration;
 
 import jakarta.persistence.PersistenceContext;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -26,10 +23,6 @@ public class DatasourceConfiguration {
                 .addScript("h2/schema-h2.sql")
                 .setName("csvDb")
                 .build();
-                //.setDriverClassName("org.h2.Driver");
-                //    .setUrl("jdbc:h2:mem:csvdb");
-                //.setUsername("sa");
-        //.setPassword("password").build();
     }
 
     @Bean

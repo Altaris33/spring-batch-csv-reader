@@ -2,6 +2,7 @@ package fr.captain.spring_batch_csv_reader.configuration;
 
 import fr.captain.spring_batch_csv_reader.model.Book;
 import fr.captain.spring_batch_csv_reader.processor.BookItemProcessor;
+import fr.captain.spring_batch_csv_reader.tasklet.BookVerificationTasklet;
 import fr.captain.spring_batch_csv_reader.writer.BookItemWriter;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -45,6 +46,9 @@ public class JobConfiguration {
     @Autowired
     private JobRepository jobRepository;
 
+    @Autowired
+    private BookVerificationTasklet bookVerificationTasklet;
+
     @Bean
     public JobLauncherApplicationRunner jobLauncherApplicationRunner(JobLauncher launcher, JobExplorer explorer,
                                                     JobRepository repository, BatchProperties properties) {
@@ -59,7 +63,8 @@ public class JobConfiguration {
     @Bean
     public Job importBookJob() throws Exception {
         return new JobBuilder("importBookJob", jobRepository)
-                .start(step1())
+                .start(csvStep())
+                .next(verificationStep())
                 .incrementer(new RunIdIncrementer())
                 .listener(new JobExecutionListener() {
                     @Override
@@ -73,8 +78,8 @@ public class JobConfiguration {
     }
 
     @Bean
-    public Step step1() throws Exception {
-        return new StepBuilder("step1", jobRepository)
+    public Step csvStep() throws Exception {
+        return new StepBuilder("csvStep", jobRepository)
                 .<Book, Book>chunk(10, transactionManager)
                 .reader(reader())
                 .processor(processor)
@@ -83,8 +88,16 @@ public class JobConfiguration {
     }
 
     @Bean
+    public Step verificationStep() throws Exception {
+        return new StepBuilder("verificationStep", jobRepository)
+                .tasklet(bookVerificationTasklet, transactionManager)
+                .build();
+    }
+
+    @Bean
     public FlatFileItemReader<Book> reader() {
         return new FlatFileItemReaderBuilder<Book>()
+                .linesToSkip(1)
                 .name("bookItemReader")
                 .resource(new ClassPathResource("books.csv"))
                 .delimited()
