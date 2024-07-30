@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    # Access the H2 console at http://localhost:8080/h2-console when the application is running
+    url: jdbc:h2:mem:csvdb
+    driverClassName: org.h2.Driver
+    username: sa
+    # defaults to no password when accessing db
+    password: password
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: create
+    jdbc:
+      initialize-schema: always
